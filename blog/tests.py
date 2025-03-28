@@ -35,3 +35,28 @@ class PostListTest(TestCase):
     def test_post_list_page_returns_correct_post_title(self):
         response = self.client.get('/blog/')
         self.assertContains(response, self.post.title)
+
+class PostDetailTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(username='andi@sibermu.id')
+        self.post = Post.objects.create(title='First post',\
+                                   slug='first-post',\
+                                   body='Post 1 body.',\
+                                   author=self.user,\
+                                   status='PB')
+        self.post2 = Post.objects.create(title='Second post',\
+                                   slug='second-post',\
+                                   body='Post 2 body.',\
+                                   author=self.user,\
+                                   status='PB')
+
+    def test_detail_post_page_returns_correct_response(self):
+        response = self.client.get(f'/blog/{self.post.id}/')
+        self.assertTemplateUsed(response, 'blog/post/detail.html')
+        self.assertEqual(response.status_code, 200)
+
+    def test_detail_post_page_has_correct_content(self):
+        response = self.client.get(f'/blog/{self.post.id}/')
+        self.assertContains(response, self.post.title)
+        self.assertContains(response, self.post.body)
+        self.assertNotContains(response, self.post2.title)
